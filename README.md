@@ -163,6 +163,11 @@ not demonstrated a routing improvement. They do not change the budget policy.
 `simulate` evaluates arrivals, dependencies, and local/hosted capacity offline.
 See [the implementation and replay report](docs/combined-policy.md) for all
 14 profiles, five strategy comparisons, traces, setup, and limitations.
-The measured scenarios show the value of workflow context, with no observed
+The original three scenarios show the value of workflow context, with no observed
 incremental classifier benefit over the context-only ablation. This is not
 a live inference scheduler.
+
+The [expanded feature-value experiment](docs/profile-value.md) tests 4,056 synthetic
+workloads using cached real predictions, plus separately labeled controlled
+examples. It reports helpful, harmful, unchanged, and speed/call-count tradeoffs;
+the original scheduling rules are unchanged.

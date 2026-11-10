@@ -109,3 +109,10 @@ The [NVIDIA and GLiClass comparison](classifiers.md) reports all 14 prompt predi
 ## Combined profiles and event-driven scheduling
 
 See [the profile/scheduling report](combined-policy.md) for the fixed combined rules, all 14 profiles, and synthetic workflows replayed using the paired measurements. A context-only ablation distinguishes scheduler benefits from classifier benefits. No additional paid inference was performed.
+
+## Expanded classifier-value stress test
+
+The [feature-value report](profile-value.md) varies pair order, arrivals, capacity,
+and background contention across 4,056 synthetic replays. Separate nomination
+and length ablations identify which feature paths change decisions. Controlled
+examples demonstrate mechanisms and failure modes; they are not real predictions.

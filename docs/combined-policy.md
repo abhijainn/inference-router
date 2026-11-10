@@ -143,3 +143,11 @@ python -m inference_router simulate examples/generated/parallel_join.json --stra
 ```
 
 `profile --input PATH --output PATH` profiles a JSONL job file. `simulate --hosted-slots N --output PATH` controls capacity and saves detailed traces. The simulator requires no model dependencies or API key. The evaluator without `--run` uses its saved profiles but still verifies their request hashes against the catalog. Thresholds are configurable via the Python `ProfileRules` API and recorded in every profile. GLiClass remains an explicit optional `classify --classifiers gliclass` choice; `classify` now defaults to NVIDIA only.
+
+## Follow-up: where profiles change decisions
+
+The [expanded stress test](profile-value.md) exercises the unchanged rules on
+4,056 varied synthetic cases and separate controlled checks. This extends the
+three original scenarios; it does not replace their results or establish live
+performance. The follow-up includes harmful cases and isolates the raw-length
+overlap mechanism from the combined acceleration nomination.
