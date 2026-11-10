@@ -1,0 +1,8 @@
+# NVIDIA + Clairvoyant only; GLiClass is not required or loaded.
+torch==2.15.0
+transformers==4.57.6
+sentencepiece==0.2.3
+huggingface-hub==0.36.2
+safetensors==0.8.0
+numpy==2.5.4
+onnxruntime==1.31.1

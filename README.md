@@ -4,8 +4,9 @@ A proof of concept for comparing local and hosted Gemma inference, estimating
 request duration, and investigating which workflow tasks can use cheaper,
 slower inference without materially delaying the final result.
 
-The current implementation benchmarks, estimates, and makes standalone budget-based
-backend selections. It does not dispatch those selections or schedule dependency graphs.
+The implementation benchmarks, describes requests, and makes provisional backend
+selections. It also simulates dependency-aware scheduling with dynamic arrivals
+offline. Live inference dispatch remains future work.
 
 ## What is implemented
 
@@ -18,9 +19,11 @@ backend selections. It does not dispatch those selections or schedule dependency
 | Separate local and hosted empirical duration profiles | Implemented |
 | Predictions recorded before execution and error scoring afterward | Implemented |
 | Optional profile updates from completed requests | Implemented; no classifier retraining |
+| Combined NVIDIA + Clairvoyant request profiles | Implemented; [rules and results](docs/combined-policy.md) |
+| Event-driven offline scheduler with arrivals and dependencies | Implemented; simulated dispatch only |
 | Optional NVIDIA task/complexity and GLiClass features | Implemented; [14-prompt comparison](docs/classifiers.md) |
 | Budget-based local/hosted policy and offline paired replay | Implemented; [results and usage](docs/policy.md) |
-| Automatic dispatch, workflow budgets, dependency scheduling | Future work |
+| Live dispatch, workflow deadlines, persistent queue | Future work |
 
 See the [experiment report](docs/experiments.md) for all 14 paired Gemma timings,
 prediction-versus-actual tables, costs, measured category averages, and limitations.
@@ -153,3 +156,13 @@ See [setup and measured predictions](docs/classifiers.md). Both recognize the si
 clearest task prompts; GLiClass's tested custom attribute configuration selects
 every attribute for every prompt and should not drive routing. Running both has
 not demonstrated a routing improvement. They do not change the budget policy.
+
+## Combined profiles and dynamic scheduling
+
+`profile` combines NVIDIA and Clairvoyant without estimating seconds.
+`simulate` evaluates arrivals, dependencies, and local/hosted capacity offline.
+See [the implementation and replay report](docs/combined-policy.md) for all
+14 profiles, five strategy comparisons, traces, setup, and limitations.
+The measured scenarios show the value of workflow context, with no observed
+incremental classifier benefit over the context-only ablation. This is not
+a live inference scheduler.

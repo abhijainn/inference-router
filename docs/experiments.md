@@ -105,3 +105,7 @@ The [expanded policy explanation](policy.md#why-the-policy-made-poor-choices) se
 ## Prompt classifier feature evaluation
 
 The [NVIDIA and GLiClass comparison](classifiers.md) reports all 14 prompt predictions, custom attribute scores, local overhead, reference agreement, and whether the two feature sets add useful information. It reuses prompt text, performs no new Gemma generation, and does not establish a new fast/slow policy.
+
+## Combined profiles and event-driven scheduling
+
+See [the profile/scheduling report](combined-policy.md) for the fixed combined rules, all 14 profiles, and synthetic workflows replayed using the paired measurements. A context-only ablation distinguishes scheduler benefits from classifier benefits. No additional paid inference was performed.

@@ -102,3 +102,7 @@ A standalone budget policy and paired replay are now implemented; see
 [policy and evaluation](policy.md). It prefers eligible local inference when
 its adjusted estimate fits and otherwise selects fitting hosted inference.
 There is no dependency deadline engine, persistent queue, or automatic dispatch yet.
+
+## Combined profiles and scheduling prototype
+
+The [combined-profile policy and offline scheduler](combined-policy.md) now use NVIDIA task/complexity features and Clairvoyant length distributions without converting them to seconds. The event-driven simulator handles visible arrivals, dependencies, and capacity; live dispatch, persistent queues, and workflow deadline calculation remain future work. The earlier duration-based budget experiment remains available for comparison.

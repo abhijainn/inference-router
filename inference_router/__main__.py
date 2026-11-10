@@ -99,12 +99,47 @@ def main():
     classify_source = classify.add_mutually_exclusive_group(required=True)
     classify_source.add_argument("prompt", nargs="?")
     classify_source.add_argument("--input")
-    classify.add_argument("--classifiers", nargs="+", choices=["nvidia", "gliclass"], default=["nvidia", "gliclass"])
+    classify.add_argument("--classifiers", nargs="+", choices=["nvidia", "gliclass"], default=["nvidia"])
     classify.add_argument("--repeat", type=int, default=1)
     classify.add_argument("--output")
+    combined = sub.add_parser("profile", help="Combine NVIDIA and Clairvoyant without estimating seconds")
+    combined_source = combined.add_mutually_exclusive_group(required=True)
+    combined_source.add_argument("prompt", nargs="?")
+    combined_source.add_argument("--input")
+    combined.add_argument("--output")
+    simulation = sub.add_parser("simulate", help="Replay dynamic scheduling offline; no API calls")
+    simulation.add_argument("workflow", help="JSON with tasks and separate local/hosted outcomes")
+    simulation.add_argument("--strategy", choices=["all", "always_local", "always_hosted", "occupancy", "context_only", "profile_dynamic"], default="all")
+    simulation.add_argument("--hosted-slots", type=int, default=2)
+    simulation.add_argument("--output")
     args = parser.parse_args()
     try:
         load_dotenv()
+        if args.command == "profile":
+            from .request_profile import RequestProfiler
+            profiler = RequestProfiler()
+            jobs = load_jobs(args.input) if args.input else [{"id": "prompt", "messages": [{"role": "user", "content": args.prompt}]}]
+            rendered = "\n".join(json.dumps({"job_id": job["id"], **profiler.predict(job["messages"])}) for job in jobs) + "\n"
+            if args.output:
+                destination = Path(args.output)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_text(rendered)
+            else:
+                print(rendered, end="")
+            return 0
+        if args.command == "simulate":
+            from .scheduler import simulate, STRATEGIES
+            spec = json.loads(Path(args.workflow).read_text())
+            strategies = STRATEGIES if args.strategy == "all" else [args.strategy]
+            result = {strategy: simulate(spec["tasks"], spec["outcomes"], strategy, args.hosted_slots) for strategy in strategies}
+            rendered = json.dumps(result, indent=2)
+            if args.output:
+                destination = Path(args.output)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_text(rendered + "\n")
+            else:
+                print(rendered)
+            return 0
         if args.command == "classify":
             from .classifiers import build_classifiers, classify_job
             if args.repeat < 1:
