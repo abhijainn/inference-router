@@ -95,3 +95,7 @@ The cost is calculated from reported usage and public catalog rates at the exper
 - [Clairvoyant pretrained artifact](https://huggingface.co/Aravind0495/clairvoyant-scheduler)
 - [Setup and reproduction commands](../README.md)
 - [Estimator equations and policy scope](estimation.md)
+
+## Budget-policy replay
+
+See [policy results](policy.md) for the three held-out and expanded 14-pair comparisons against always-local and always-hosted. The current estimator does not demonstrate a routing advantage under the tested budgets. No additional paid calls were made.

@@ -4,8 +4,8 @@ A proof of concept for comparing local and hosted Gemma inference, estimating
 request duration, and investigating which workflow tasks can use cheaper,
 slower inference without materially delaying the final result.
 
-The current implementation benchmarks and estimates. It does not yet make
-automatic routing decisions or schedule dependency graphs.
+The current implementation benchmarks, estimates, and makes standalone budget-based
+backend selections. It does not dispatch those selections or schedule dependency graphs.
 
 ## What is implemented
 
@@ -18,12 +18,14 @@ automatic routing decisions or schedule dependency graphs.
 | Separate local and hosted empirical duration profiles | Implemented |
 | Predictions recorded before execution and error scoring afterward | Implemented |
 | Optional profile updates from completed requests | Implemented; no classifier retraining |
-| Eligibility, suitability scoring, cost-aware routing, dependency scheduling | Future work |
+| Budget-based local/hosted policy and offline paired replay | Implemented; [results and usage](docs/policy.md) |
+| Automatic dispatch, workflow budgets, dependency scheduling | Future work |
 
 See the [experiment report](docs/experiments.md) for all 14 paired Gemma timings,
 prediction-versus-actual tables, costs, measured category averages, and limitations.
 See [estimation and policy design](docs/estimation.md) for the equations and
-proposed routing objective.
+routing objective. See [policy results](docs/policy.md) for hosted calls avoided,
+budget misses, and comparisons with always-local and always-hosted.
 
 ## Setup
 

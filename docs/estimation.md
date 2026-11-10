@@ -98,5 +98,7 @@ Initially a caller can supply a task budget. A later dependency scheduler can
 compute budgets using the workflow deadline, remaining downstream work and
 backend contention, and revise them as tasks complete. The score should be judged
 by workflow completion time and hosted cost saved, not just classifier accuracy.
-No suitability score, deadline engine, persistent queue or automatic router is
-implemented in this repository yet.
+A standalone budget policy and paired replay are now implemented; see
+[policy and evaluation](policy.md). It prefers eligible local inference when
+its adjusted estimate fits and otherwise selects fitting hosted inference.
+There is no dependency deadline engine, persistent queue, or automatic dispatch yet.

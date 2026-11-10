@@ -74,9 +74,72 @@ def main():
     run.add_argument("--update-timing-profile", action="store_true", help="Refresh measured speed after each completion; classifier stays frozen")
     evaluate = sub.add_parser("evaluate-predictions", help="Summarize predictions recorded before completed requests")
     evaluate.add_argument("measurements")
+    policy = sub.add_parser("policy", help="Choose a backend without executing inference")
+    policy.add_argument("--budget-seconds", required=True, type=float)
+    policy.add_argument("--safety-factor", type=float, default=1.25)
+    policy.add_argument("--local-seconds", type=float)
+    policy.add_argument("--hosted-seconds", type=float)
+    policy.add_argument("--local-queue-seconds", type=float, default=0)
+    policy.add_argument("--hosted-queue-seconds", type=float, default=0)
+    policy.add_argument("--prompt")
+    policy.add_argument("--local-profile")
+    policy.add_argument("--hosted-profile")
+    replay_parser = sub.add_parser("replay-policy", help="Compare policy and baselines using paired logs; no inference calls")
+    replay_parser.add_argument("--local-log", required=True)
+    replay_parser.add_argument("--hosted-log", required=True)
+    replay_parser.add_argument("--budgets", nargs="+", type=float, default=[5, 20, 60])
+    replay_parser.add_argument("--safety-factor", type=float, default=1.25)
+    replay_parser.add_argument("--mode", choices=["recorded", "leave-one-out"], default="recorded")
+    replay_parser.add_argument("--calibration-local")
+    replay_parser.add_argument("--calibration-hosted")
+    replay_parser.add_argument("--requests")
+    replay_parser.add_argument("--output")
+    replay_parser.add_argument("--format", choices=["json", "markdown"], default="json")
     args = parser.parse_args()
     try:
         load_dotenv()
+        if args.command == "policy":
+            from .policy import BackendEstimate, choose_backend
+            predictions = {}
+            if args.prompt is not None:
+                if not (args.local_profile and args.hosted_profile) or args.local_seconds is not None or args.hosted_seconds is not None:
+                    raise ValueError("Prompt mode requires both profiles and cannot mix numeric duration estimates")
+                from .estimator import DurationEstimator, TimingProfile
+                estimator = DurationEstimator()
+                for backend, path, expected in [("local", args.local_profile, "local_ollama"), ("hosted", args.hosted_profile, "deepinfra")]:
+                    estimator.profile = TimingProfile.load(path)
+                    if estimator.profile.configuration.get("backend") != expected:
+                        raise ValueError("Profile backend does not match policy backend")
+                    predictions[backend] = estimator.predict([{"role": "user", "content": args.prompt}], -1)
+                args.local_seconds = predictions["local"]["estimated_seconds"]
+                args.hosted_seconds = predictions["hosted"]["estimated_seconds"]
+            elif args.local_profile or args.hosted_profile:
+                raise ValueError("Use --prompt with timing profiles")
+            result = choose_backend(BackendEstimate(args.local_seconds, args.local_queue_seconds),
+                                    BackendEstimate(args.hosted_seconds, args.hosted_queue_seconds),
+                                    args.budget_seconds, args.safety_factor)
+            if predictions:
+                result["duration_predictions"] = predictions
+            print(json.dumps(result, indent=2))
+            return 0
+        if args.command == "replay-policy":
+            from .policy_replay import read_rows, replay, leave_one_out_predictions, markdown_report
+            local, hosted = read_rows(args.local_log), read_rows(args.hosted_log)
+            if args.mode == "leave-one-out":
+                if not (args.calibration_local and args.calibration_hosted and args.requests):
+                    raise ValueError("Leave-one-out requires both calibration logs and --requests prompt catalog")
+                local, hosted = leave_one_out_predictions(local, hosted, read_rows(args.calibration_local),
+                                                          read_rows(args.calibration_hosted), load_jobs(args.requests))
+            result = replay(local, hosted, args.budgets, args.safety_factor)
+            result["mode"] = args.mode
+            rendered = markdown_report(result) if args.format == "markdown" else json.dumps(result, indent=2)
+            if args.output:
+                destination = Path(args.output)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_text(rendered + "\n")
+            else:
+                print(rendered)
+            return 0
         if args.command == "evaluate-predictions":
             rows = [json.loads(line) for line in Path(args.measurements).read_text().splitlines() if line.strip()]
             groups = {}
