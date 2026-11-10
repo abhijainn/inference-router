@@ -147,6 +147,17 @@ A case is **better** if it finishes foreground work no later and uses no more ho
     for variant,values in stats.items():
         counts=values['categories']
         text+=f"| {variant} | {counts['better']} | {counts['equal']} | {counts['worse']} | {counts['tradeoff']} | {values['routing_changed']} | {values['mean_finish']:.2f}s | {values['mean_hosted']:.3f} |\n"
+    text+='\n### Fast versus slow inference usage\n\nThese are simulated placements across the same cases, not new API calls. Each strategy executes the same total number of tasks.\n\n| Strategy | Fast: hosted | Slow: local | Hosted share | Local share |\n|---|---:|---:|---:|---:|\n'
+    totals={}
+    for variant in VARIANTS:
+        hosted=sum(case['results'][variant]['metrics']['hosted_calls'] for case in cases)
+        local=sum(case['results'][variant]['metrics']['hosted_calls_avoided'] for case in cases)
+        totals[variant]=(hosted,local)
+        text+=f"| {variant} | {hosted:,} | {local:,} | {100*hosted/(hosted+local):.2f}% | {100*local/(hosted+local):.2f}% |\n"
+    extra_nomination=totals['nomination_only'][0]-totals['context_only'][0]
+    extra_combined=totals['combined'][0]-totals['context_only'][0]
+    extra_length=totals['combined'][0]-totals['nomination_only'][0]
+    text+=f"\nThe nomination mechanism adds {extra_nomination} hosted calls relative to context-only; the full combined policy adds {extra_combined}. Adding the length mechanism on top of nomination accounts for {extra_length} extra calls. Hosted calls are a spending proxy, not measured dollar savings; prompts and generated lengths differ.\n"
     text+='''
 All comparisons above are against context-only. Means weight every synthetic case equally, count reused observations repeatedly, and are descriptive only. They are not confidence estimates or expected production savings.
 

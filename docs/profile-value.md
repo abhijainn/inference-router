@@ -62,6 +62,22 @@ A case is **better** if it finishes foreground work no later and uses no more ho
 | always_hosted | 0 | 0 | 1834 | 2222 | 4056 | 36.73s | 2.962 |
 | occupancy | 476 | 1092 | 2266 | 222 | 2964 | 38.55s | 1.359 |
 
+### Fast versus slow inference usage
+
+These are simulated placements across the same cases, not new API calls. Each strategy executes the same total number of tasks.
+
+| Strategy | Fast: hosted | Slow: local | Hosted share | Local share |
+|---|---:|---:|---:|---:|
+| context_only | 4,152 | 7,860 | 34.57% | 65.43% |
+| length_signal_only | 4,217 | 7,795 | 35.11% | 64.89% |
+| nomination_only | 4,168 | 7,844 | 34.70% | 65.30% |
+| combined | 4,298 | 7,714 | 35.78% | 64.22% |
+| always_local | 0 | 12,012 | 0.00% | 100.00% |
+| always_hosted | 12,012 | 0 | 100.00% | 0.00% |
+| occupancy | 5,512 | 6,500 | 45.89% | 54.11% |
+
+The nomination mechanism adds 16 hosted calls relative to context-only; the full combined policy adds 146. Adding the length mechanism on top of nomination accounts for 130 extra calls. Hosted calls are a spending proxy, not measured dollar savings; prompts and generated lengths differ.
+
 All comparisons above are against context-only. Means weight every synthetic case equally, count reused observations repeatedly, and are descriptive only. They are not confidence estimates or expected production savings.
 
 ### Combined results by workload condition
