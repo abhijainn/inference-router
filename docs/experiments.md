@@ -99,3 +99,5 @@ The cost is calculated from reported usage and public catalog rates at the exper
 ## Budget-policy replay
 
 See [policy results](policy.md) for the three held-out and expanded 14-pair comparisons against always-local and always-hosted. The current estimator does not demonstrate a routing advantage under the tested budgets. No additional paid calls were made.
+
+The [expanded policy explanation](policy.md#why-the-policy-made-poor-choices) separates unavoidable misses from avoidable routing errors and explains why hosted calls avoided alone is insufficient.

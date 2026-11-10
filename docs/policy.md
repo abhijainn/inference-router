@@ -2,6 +2,26 @@
 
 The standalone policy now selects a backend without executing a request. It prefers local inference when its adjusted estimate fits the task budget; otherwise it chooses hosted if that estimate fits. If neither fits, it returns `neither_fits` with no backend. Missing estimates can return `uncertain`. Dispatch, dependency scheduling, persistent queues, and automatic deadline allocation remain future work.
 
+## What this experiment was trying to answer
+
+The intended tradeoff is to reserve hosted inference for requests that need its speed and run other requests locally to avoid an API call. A request is a good fit for local when it can finish within the acceptable wait, not simply because it is long or complex. For example, a 30-second local job can fit a 60-second budget while a 3-second local job can fail a 2-second budget.
+
+This experiment tested a minimal version of that idea: **Can the existing duration estimates choose local often while meeting the same per-request budgets as hosted?** It deliberately did not add dollar-cost estimates, workflow dependencies, traffic simulation, or a learned scheduling model. The acceptable wait was a configured test input, not something inferred from the request text.
+
+We reused completed paired measurements, made a simulated choice for each request, and looked up how long the chosen backend had actually taken. We did not send each request again. Consequently, “calls avoided” means calls the policy would have avoided in this replay; it is not a claim that those historical paid benchmark calls were refunded or never occurred.
+
+## What changed in the repository
+
+| Part | Purpose |
+|---|---|
+| `inference_router/policy.py` | A decision function using backend estimates, eligibility, optional queue waits, task budget, and allowance. Actual outcomes cannot enter this function. |
+| `inference_router/policy_replay.py` | Pairs logged measurements, creates retrospective estimates when explicitly requested, and scores policy, always-local, and always-hosted. |
+| `policy` command | Returns a backend choice and explanation from numeric estimates or the existing two timing profiles. It does not execute inference. |
+| `replay-policy` command | Reproduces comparisons from private logs and outputs aggregate tables or detailed results. |
+| `tests/test_policy.py` | Checks decisions, accounting, offline commands, and exclusion of the tested prompt from retrospective calibration. |
+
+Clairvoyant was not retrained or replaced. Its short/medium/long output-length probabilities were still converted to estimated seconds using each backend's measured length representatives and speed. The policy then applied a 25% allowance to those estimates. The timing profiles were varied for leave-one-prompt-out evaluation only; that evaluation is not an online adaptation experiment.
+
 ## Decision rule
 
 For each eligible backend:
@@ -77,6 +97,46 @@ The following is the secondary replay. Estimates below are before the 1.25 allow
 | incident-01 | 15.76s | 14.97s | local | 28.54s | 13.67s |
 | runbook-medium-01 | 22.86s | 20.25s | neither_fits | 15.46s | 11.94s |
 | summarize-01 | 16.94s | 15.28s | hosted | 2.45s | 1.48s |
+
+## Why the policy made poor choices
+
+There were three separate failure modes at a 20-second budget:
+
+| Failure mode | Concrete example | Consequence |
+|---|---|---|
+| Overestimating a short answer | Held-out classification: local forecast 15.85s versus actual 0.34s. With the allowance it looks like 19.81s. | It barely qualifies at 20s and is rejected at 5s, despite actually being fast. |
+| Underestimating a longer answer | Held-out code: local forecast 13.82s, adjusted to 17.28s, versus actual 28.87s. Hosted actually finishes in 17.98s. | The policy chooses local and misses a budget that hosted could meet. |
+| Allowance pushes a feasible estimate over the cutoff | Held-out incident: hosted forecast 17.51s becomes 21.89s after the allowance; actual hosted time is 14.24s. | Neither adjusted estimate fits, so this policy returns no route even though hosted could meet the budget. |
+
+The three held-out requests therefore produce one successful local completion, one late local completion, and one declined request at 20s. They avoid two hosted calls but incur two budget misses. Always-hosted completes all three within 20s; always-local incurs two misses while avoiding all three hosted calls.
+
+Across the expanded 14-pair replay, the policy sends nine requests locally, one to hosted, and declines four. Five local requests and the one hosted request meet the budget; four local requests run late. The four declined requests are also failures for the headline metric, making eight total misses. The single hosted selection is `summarize-01`, whose local completion actually fit too; this replay did not successfully reserve hosted calls for the tasks that needed them.
+
+Using the observed outcomes only as an after-the-fact diagnostic, three requests exceed 20s on **both** backends: code review, constraint planning, and evidence synthesis. No backend choice could meet 20s for those particular completions. The other five policy misses were avoidable in these observations:
+
+| Request | Policy action | Backend that actually met 20s |
+|---|---|---|
+| `code-01` | Declined | Local or hosted |
+| `runbook-medium-01` | Declined | Local or hosted |
+| `holdout-incident-01` | Declined | Hosted |
+| `incident-01` | Local, late | Hosted |
+| `holdout-code-01` | Local, late | Hosted |
+
+This diagnostic uses information unavailable at decision time and is not an achievable prediction guarantee. It explains why always-hosted has three misses while the policy has eight. It also isolates a real opportunity in these observations: eight requests fit locally, and three additional requests fit only on hosted. The current estimates did not identify that split accurately.
+
+The 5s and 60s scenarios expose the same problem from different directions. At 5s, inflated forecasts cause the policy to decline every request, although six observed local completions fit. At 60s, all 14 local completions fit, so a policy provides no advantage over simply choosing local for everything.
+
+## What we learned and what remains open
+
+- The decision rule is implemented and its behavior is verified. Passing 44 software tests establishes implementation behavior, not estimation accuracy or policy usefulness.
+- On these measurements, the current policy offers no improvement over the tested baselines. Nine avoided hosted calls alone would be a misleading success metric because it comes with eight misses and four declined tasks.
+- The estimated durations need better separation between constrained short answers and longer completions. The classifier's coarse length probabilities and their empirical conversion are plausible contributors, but this replay does not isolate which component causes each error. A useful next diagnostic is predicted versus actual output length, followed by backend duration error conditional on length.
+- The 1.25 allowance is a design choice, not a statistically established reliability level. It can reject feasible work and cannot reliably repair large underestimates. Choosing a different multiplier on these same results would be tuning, requiring new held-out evaluation.
+- Returning no route is an explicit experimental behavior. A production application would need a defined response, such as reporting an infeasible deadline, asking for a relaxed budget, or dispatching best effort. Dispatching anyway would require a separate measured policy comparison; it is not what these tables evaluate.
+- A fuzzy suitability score could express margin or uncertainty, but changing the label does not remove forecast errors. Its usefulness still needs evaluation against hosted use and budget failures.
+- Workflow scheduling can eventually supply budgets from dependency slack and deadlines. It will also need queue and contention estimates. That does not fix the request-duration errors observed here, so scheduler work is not required to diagnose this first policy.
+
+The evidence is preliminary: three prospective held-out requests plus 11 retrospectively evaluated calibration prompts, one paired sample each, no quality scoring, no confidence intervals, no concurrency testing, and different local/hosted precision and answer lengths. The next evaluation should use fresh varied prompts and repeated paired measurements, retain predictions before execution, and report quality eligibility alongside deadline performance and hosted use. No new inference was run for this documentation update.
 
 ## Run the policy
 

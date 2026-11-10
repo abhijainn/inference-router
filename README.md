@@ -142,3 +142,5 @@ passed 34 tests. CI tests both paths.
 Raw responses, JSON/JSONL measurements, generated profiles, model weights,
 environments, and credentials are intentionally excluded. Results are preserved
 as lightweight Markdown tables. This repository contains no API key.
+
+See [the policy experiment explanation](docs/policy.md#what-this-experiment-was-trying-to-answer) for the goal, implementation changes, failure examples, and next steps.
