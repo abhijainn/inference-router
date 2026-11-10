@@ -1,0 +1,33 @@
+# Credentials: only the blank example may be committed.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Measurements, generated inputs/profiles, and downloaded model artifacts.
+*.json
+*.jsonl
+*.csv
+*.onnx
+*.gguf
+runs/
+profiles/
+data/
+outputs/
+.models/
+.cache/
+examples/generated/
+
+# Local environments and backups.
+.venv/
+.venv*/
+venv/
+.runtime-estimator/
+before-*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.DS_Store
