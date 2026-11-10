@@ -95,9 +95,36 @@ def main():
     replay_parser.add_argument("--requests")
     replay_parser.add_argument("--output")
     replay_parser.add_argument("--format", choices=["json", "markdown"], default="json")
+    classify = sub.add_parser("classify", help="Extract frozen task/attribute features locally; no inference backend calls")
+    classify_source = classify.add_mutually_exclusive_group(required=True)
+    classify_source.add_argument("prompt", nargs="?")
+    classify_source.add_argument("--input")
+    classify.add_argument("--classifiers", nargs="+", choices=["nvidia", "gliclass"], default=["nvidia", "gliclass"])
+    classify.add_argument("--repeat", type=int, default=1)
+    classify.add_argument("--output")
     args = parser.parse_args()
     try:
         load_dotenv()
+        if args.command == "classify":
+            from .classifiers import build_classifiers, classify_job
+            if args.repeat < 1:
+                raise ValueError("repeat must be positive")
+            jobs = load_jobs(args.input) if args.input else [{"id": "prompt", "messages": [{"role": "user", "content": args.prompt}]}]
+            models = build_classifiers(list(dict.fromkeys(args.classifiers)))
+            rows = []
+            for job in jobs:
+                result = classify_job(job, models, args.repeat)
+                result["model_load_seconds"] = {k: v.load_seconds for k, v in models.items()}
+                rows.append(json.dumps(result))
+                print(f"Classified {job['id']}", file=sys.stderr)
+            rendered = "\n".join(rows) + "\n"
+            if args.output:
+                destination = Path(args.output)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_text(rendered)
+            else:
+                print(rendered, end="")
+            return 0
         if args.command == "policy":
             from .policy import BackendEstimate, choose_backend
             predictions = {}

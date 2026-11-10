@@ -18,6 +18,7 @@ backend selections. It does not dispatch those selections or schedule dependency
 | Separate local and hosted empirical duration profiles | Implemented |
 | Predictions recorded before execution and error scoring afterward | Implemented |
 | Optional profile updates from completed requests | Implemented; no classifier retraining |
+| Optional NVIDIA task/complexity and GLiClass features | Implemented; [14-prompt comparison](docs/classifiers.md) |
 | Budget-based local/hosted policy and offline paired replay | Implemented; [results and usage](docs/policy.md) |
 | Automatic dispatch, workflow budgets, dependency scheduling | Future work |
 
@@ -144,3 +145,11 @@ environments, and credentials are intentionally excluded. Results are preserved
 as lightweight Markdown tables. This repository contains no API key.
 
 See [the policy experiment explanation](docs/policy.md#what-this-experiment-was-trying-to-answer) for the goal, implementation changes, failure examples, and next steps.
+
+## Optional prompt classifiers
+
+NVIDIA and GLiClass now expose local-only request features through `classify`.
+See [setup and measured predictions](docs/classifiers.md). Both recognize the six
+clearest task prompts; GLiClass's tested custom attribute configuration selects
+every attribute for every prompt and should not drive routing. Running both has
+not demonstrated a routing improvement. They do not change the budget policy.

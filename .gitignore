@@ -9,6 +9,8 @@
 *.json
 *.jsonl
 *.csv
+*.safetensors
+*.bin
 *.onnx
 *.gguf
 runs/

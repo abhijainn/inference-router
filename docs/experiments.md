@@ -101,3 +101,7 @@ The cost is calculated from reported usage and public catalog rates at the exper
 See [policy results](policy.md) for the three held-out and expanded 14-pair comparisons against always-local and always-hosted. The current estimator does not demonstrate a routing advantage under the tested budgets. No additional paid calls were made.
 
 The [expanded policy explanation](policy.md#why-the-policy-made-poor-choices) separates unavoidable misses from avoidable routing errors and explains why hosted calls avoided alone is insufficient.
+
+## Prompt classifier feature evaluation
+
+The [NVIDIA and GLiClass comparison](classifiers.md) reports all 14 prompt predictions, custom attribute scores, local overhead, reference agreement, and whether the two feature sets add useful information. It reuses prompt text, performs no new Gemma generation, and does not establish a new fast/slow policy.
