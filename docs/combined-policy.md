@@ -1,5 +1,7 @@
 # Combined request profiles and dynamic scheduling
 
+> **Precision scope:** These historical results use local Q4_K_M versus hosted BF16. They are not a matched-precision hardware comparison. The later BF16 timing rerun was invalidated by environmental interruptions; see the [precision audit](precision-audit.md).
+
 ## What is implemented
 
 `profile` combines frozen NVIDIA task/complexity outputs with frozen Clairvoyant output-length probabilities. It does not convert them into seconds. The policy preserves each signal and returns a provisional `prefer_local`, `consider_hosted`, or `uncertain` result with reasons. GLiClass is not loaded. The previous fixed-budget policy remains a separate experiment.

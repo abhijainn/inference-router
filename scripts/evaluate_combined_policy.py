@@ -47,6 +47,8 @@ def render(rows,results):
     counts={key:sum(row['profile']['preference']==key for row in rows) for key in ['prefer_local','consider_hosted','uncertain']}
     text='''# Combined request profiles and dynamic scheduling
 
+> **Precision scope:** These historical results use local Q4_K_M versus hosted BF16, not a matched-precision hardware comparison. See [the precision audit](precision-audit.md) before citing them as hardware evidence.
+
 ## What is implemented
 
 `profile` combines frozen NVIDIA task/complexity outputs with frozen Clairvoyant output-length probabilities. It does not convert them into seconds. The policy preserves each signal and returns a provisional `prefer_local`, `consider_hosted`, or `uncertain` result with reasons. GLiClass is not loaded. The previous fixed-budget policy remains a separate experiment.

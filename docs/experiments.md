@@ -1,5 +1,7 @@
 # Gemma local versus hosted experiment
 
+> **Precision scope:** These historical results use local Q4_K_M versus hosted BF16. They are not a matched-precision hardware comparison. The later BF16 timing rerun was invalidated by environmental interruptions; see the [precision audit](precision-audit.md).
+
 Experiment date: November 10, 2026 (America/Chicago). All numbers below are from real completed requests. Raw logs and generated JSON profiles are excluded from Git; these tables are a compact snapshot. The synthetic prompts are preserved in `examples/make_requests.py`.
 
 ## Setup and method

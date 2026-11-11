@@ -1,5 +1,7 @@
 # Where request profiles change scheduling
 
+> **Precision scope:** These historical results use local Q4_K_M versus hosted BF16. They are not a matched-precision hardware comparison. The later BF16 timing rerun was invalidated by environmental interruptions; see the [precision audit](precision-audit.md).
+
 ## Question and frozen policy
 
 We tested whether NVIDIA/Clairvoyant information changes backend choices beyond the context-only scheduler. No scheduler rules, model weights, profile thresholds, or earlier measurements were changed to improve these results. No new paid inference calls were made.

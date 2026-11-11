@@ -8,6 +8,15 @@ The implementation benchmarks, describes requests, and makes provisional backend
 selections. It also simulates dependency-aware scheduling with dynamic arrivals
 offline. Live inference dispatch remains future work.
 
+## Precision correction and rerun status
+
+The original timing/scheduling results compare local **Q4_K_M** with hosted
+**BF16**. They are not a same-precision hardware benchmark. A matched reported
+BF16 setup was verified, but the timing rerun was stopped after system sleep
+and thermal emergency events; it is invalidated and supplies no replacement
+performance claims. See the [precision audit](docs/precision-audit.md) for
+verified metadata, recorded usage, and a safe fresh-run procedure.
+
 ## What is implemented
 
 | Component | Status |
