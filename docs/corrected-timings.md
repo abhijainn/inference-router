@@ -60,3 +60,7 @@ python3 scripts/replay_corrected_timings.py \
 ```
 
 The CSV is public and small. Cached real classifier profiles remain private/ignored as in the original experiment, so a fresh clone must generate those profiles before reproducing the replay. This command loads no model and requires no API key when the cached profiles already exist. Historical duration-estimator and budget-policy reports remain explicitly labeled with their original inputs; they were not recalibrated using end-to-end corrections without replacement phase data.
+
+## Predictor follow-up
+
+[The frozen LTR versus Clairvoyant comparison](ltr-comparison.md) reuses this exact corrected timing fixture and the original saved output lengths. No Gemma requests were repeated. It keeps the existing scheduler result above as the reference baseline.

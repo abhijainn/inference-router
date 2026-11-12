@@ -8,6 +8,10 @@ The implementation benchmarks, describes requests, and makes provisional backend
 selections. It also simulates dependency-aware scheduling with dynamic arrivals
 offline. Live inference dispatch remains future work.
 
+## Optional pretrained LTR comparison
+
+The frozen OPT-125M length ranker is available through `python -m inference_router rank` after `python scripts/download_ltr.py` (optional `ltr` dependencies). It uses CPU and performs no Gemma generation. [The 14-prompt comparison](docs/ltr-comparison.md) reports improved output-length ranking but no average scheduler speedup with existing nominations held fixed. LTR remains optional; the default profile policy is unchanged.
+
 ## Current timing data
 
 The [14-row corrected timing table and regenerated scheduler replay](docs/corrected-timings.md) use the project owner’s supplied corrections. A [small CSV fixture](examples/corrected-gemma-timings.csv) preserves all 14 pairs. Older policy/scheduler reports are explicitly historical and retain their original inputs. No new inference was run for this correction.

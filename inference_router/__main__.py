@@ -61,6 +61,11 @@ def main():
     run.add_argument("--max-tokens", type=int, default=None, help="Override all job output caps; -1 generates until the model stops")
     run.add_argument("--no-warmup", action="store_true", help="Skip warmup; does not force a cold start")
     run.add_argument("--save-responses", action="store_true", help="Save generated text; prompts are never written to logs")
+    rank = sub.add_parser("rank", help="Frozen LTR length score; no Gemma generation")
+    rank_source = rank.add_mutually_exclusive_group(required=True)
+    rank_source.add_argument("prompt", nargs="?")
+    rank_source.add_argument("--input")
+    rank.add_argument("--output")
     estimate = sub.add_parser("estimate", help="Predict output length and approximate duration without calling Ollama")
     source = estimate.add_mutually_exclusive_group(required=True)
     source.add_argument("prompt", nargs="?")
@@ -120,6 +125,19 @@ def main():
             profiler = RequestProfiler()
             jobs = load_jobs(args.input) if args.input else [{"id": "prompt", "messages": [{"role": "user", "content": args.prompt}]}]
             rendered = "\n".join(json.dumps({"job_id": job["id"], **profiler.predict(job["messages"])}) for job in jobs) + "\n"
+            if args.output:
+                destination = Path(args.output)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_text(rendered)
+            else:
+                print(rendered, end="")
+            return 0
+        if args.command == "rank":
+            from .ltr import LTRPredictor
+            predictor = LTRPredictor()
+            jobs = load_jobs(args.input) if args.input else [{"id": "prompt", "messages": [{"role": "user", "content": args.prompt}]}]
+            rows = [{"job_id": job["id"], **predictor.predict(job["messages"])} for job in jobs]
+            rendered = "\n".join(json.dumps(row) for row in rows) + "\n"
             if args.output:
                 destination = Path(args.output)
                 destination.parent.mkdir(parents=True, exist_ok=True)

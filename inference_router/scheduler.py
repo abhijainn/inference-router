@@ -32,6 +32,15 @@ def goal_depths(tasks):
     return {key: depth(key) for key in tasks}
 
 
+def length_covers(running_profile, waiting_profile):
+    """Compare only predictor scores with the same declared scale."""
+    if ('length_order_score' in running_profile and 'length_order_score' in waiting_profile
+            and running_profile.get('length_order_source') == waiting_profile.get('length_order_source')):
+        return running_profile['length_order_score'] >= waiting_profile['length_order_score']
+    order = {'short': 0, 'medium': 1, 'long': 2}
+    return order[running_profile['length_class']] >= order[waiting_profile['length_class']]
+
+
 def choose_dispatch(visible, ready, running, available, strategy):
     """Return one (task, backend, reason) using no observed service outcomes.
 
@@ -71,9 +80,8 @@ def choose_dispatch(visible, ready, running, available, strategy):
     if available['local']:
         return critical, 'local', 'Run ready work locally while retaining hosted capacity.'
     if available['hosted'] and depths[critical]:
-        order = {'short': 0, 'medium': 1, 'long': 2}
         hosted_cover = any(r['backend'] == 'hosted' and depths.get(r['id'], 0) >= depths[critical]
-                           and order[visible[r['id']]['profile']['length_class']] >= order[task['profile']['length_class']] for r in running)
+                           and length_covers(visible[r['id']]['profile'], task['profile']) for r in running)
         if hosted_cover:
             return None  # Reconsider after the next completion/arrival; no finish-time oracle.
         return critical, 'hosted', 'Local is occupied; serve waiting foreground work on hosted.'
@@ -99,6 +107,10 @@ def validate(tasks, outcomes, hosted_slots):
         profile = task.get('profile', {})
         if profile.get('preference') not in {'prefer_local', 'consider_hosted', 'uncertain'} or profile.get('length_class') not in {'short', 'medium', 'long'}:
             raise ValueError('Task requires a valid request profile')
+        if 'length_order_score' in profile or 'length_order_source' in profile:
+            value = profile.get('length_order_score')
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not isinstance(profile.get('length_order_source'), str) or not profile['length_order_source']:
+                raise ValueError('Continuous length ordering requires a finite score and named source')
         if key not in outcomes or set(outcomes[key]) != {'local', 'hosted'}:
             raise ValueError('Every task needs a local/hosted replay outcome')
         for duration in outcomes[key].values():
