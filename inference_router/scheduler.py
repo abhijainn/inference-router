@@ -7,6 +7,8 @@ import heapq
 import math
 
 STRATEGIES = ('always_local', 'always_hosted', 'occupancy', 'context_only', 'profile_dynamic')
+# Opt-in controls keep all work on hosted while matching structural priorities.
+HOSTED_PRIORITY_BASELINES = ('hosted_context', 'hosted_profile')
 
 
 def _seconds(value):
@@ -47,7 +49,7 @@ def choose_dispatch(visible, ready, running, available, strategy):
     `visible` includes submitted blocked tasks, but never future arrivals.
     Unknown profiles are a neutral preference, not automatic hosted escalation.
     """
-    if strategy not in STRATEGIES:
+    if strategy not in STRATEGIES + HOSTED_PRIORITY_BASELINES:
         raise ValueError('Unknown scheduling strategy')
     if not ready:
         return None
@@ -60,6 +62,14 @@ def choose_dispatch(visible, ready, running, available, strategy):
     if strategy in {'always_local', 'always_hosted'}:
         backend = 'local' if strategy == 'always_local' else 'hosted'
         return (ordered[0], backend, strategy) if available[backend] else None
+    if strategy in HOSTED_PRIORITY_BASELINES:
+        if not available['hosted']:
+            return None
+        depths = goal_depths(visible)
+        ordered.sort(key=lambda key: (-depths[key],
+                     -int(strategy == 'hosted_profile' and visible[key]['profile']['preference'] == 'consider_hosted'),
+                     visible[key]['arrival_seconds'], key))
+        return ordered[0], 'hosted', 'Use hosted capacity with foreground dependency priority.'
     if strategy == 'occupancy':
         for backend in ['local', 'hosted']:
             if available[backend]:

@@ -1,5 +1,7 @@
 # Corrected Gemma timings and offline scheduler replay
 
+> For two hosted slots versus one hosted plus one local slot, use [the equal-capacity replay](equal-capacity.md). The sweep below varies hosted capacity and gives mixed policies an additional local worker, so its always-hosted comparison does not isolate a scheduling advantage.
+
 ## Source and scope
 
 The project owner supplied this corrected 14-row table on November 11, 2026. It is the current timing fixture for this replay. Four local values changed from the original logs: extraction 1.03 → 2.03 seconds; classification 0.27 → 1.27; constraint planning 32.21 → 52.21; evidence synthesis 32.48 → 52.48. All other supplied values are unchanged. These are owner-supplied corrections, not independently verified new measurements. Original raw logs, tokens, phase timings, and saved predictions were preserved.

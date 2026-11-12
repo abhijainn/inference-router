@@ -8,6 +8,10 @@ The implementation benchmarks, describes requests, and makes provisional backend
 selections. It also simulates dependency-aware scheduling with dynamic arrivals
 offline. Live inference dispatch remains future work.
 
+## Equal-capacity scheduling comparison
+
+[The equal-capacity replay](docs/equal-capacity.md) compares two hosted slots against one hosted plus one local slot on 2,028 unique workloads. Hosted FIFO finishes foreground work in 30.67s on average; the combined mixed policy takes 34.09s while avoiding 63.0% of hosted placements. Additional all-hosted priority controls separate queue ordering from backend placement. These are offline fixture results, not new inference measurements.
+
 ## Optional pretrained LTR comparison
 
 The frozen OPT-125M length ranker is available through `python -m inference_router rank` after `python scripts/download_ltr.py` (optional `ltr` dependencies). It uses CPU and performs no Gemma generation. [The 14-prompt comparison](docs/ltr-comparison.md) reports improved output-length ranking but no average scheduler speedup with existing nominations held fixed. LTR remains optional; the default profile policy is unchanged.
