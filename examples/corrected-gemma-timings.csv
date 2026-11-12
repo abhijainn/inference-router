@@ -1,0 +1,15 @@
+job_id,request,slow_seconds,fast_seconds
+extract-01,Extraction,2.03,1.44
+classify-01,Classification,1.27,0.40
+summarize-01,Summarization,2.45,1.48
+explain-01,Explanation,3.88,2.48
+code-01,Basic code generation,3.58,1.26
+incident-01,Incident investigation,28.54,13.67
+code-review-01,Code review,51.70,35.43
+constraint-plan-01,Constraint planning,52.21,45.54
+evidence-synthesis-01,Evidence synthesis,52.48,39.17
+runbook-medium-01,Operational runbook,15.46,11.94
+architecture-medium-01,Architecture review,14.39,7.49
+holdout-incident-01,Validation: incident,30.18,14.24
+holdout-code-01,Validation: code,28.87,17.98
+holdout-classify-01,Validation: classification,0.34,0.25

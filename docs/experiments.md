@@ -2,7 +2,7 @@
 
 > **Precision scope:** These historical results use local Q4_K_M versus hosted BF16. They are not a matched-precision hardware comparison. The later BF16 timing rerun was invalidated by environmental interruptions; see the [precision audit](precision-audit.md).
 
-Experiment date: November 10, 2026 (America/Chicago). All numbers below are from real completed requests. Raw logs and generated JSON profiles are excluded from Git; these tables are a compact snapshot. The synthetic prompts are preserved in `examples/make_requests.py`.
+Experiment date: November 10, 2026 (America/Chicago). The end-to-end timing table below incorporates the project owner’s corrected values supplied on November 11, 2026. Four local durations differ from the original saved logs; these are supplied corrections, not a new benchmark run. Other token, phase-timing, and estimator tables retain their original measurements. Raw logs and generated JSON profiles are excluded from Git; these tables are a compact snapshot. The synthetic prompts are preserved in `examples/make_requests.py`.
 
 ## Setup and method
 
@@ -24,26 +24,30 @@ Eleven prompts per backend built the timing profiles: five basic tasks, four com
 
 ## Actual end-to-end timings
 
-| Request | Phase | Local seconds | Hosted seconds | Local output tokens | Hosted output tokens |
+| Request | Phase | Slow inference seconds (local Q4_K_M) | Fast inference seconds (hosted BF16) | Local output tokens | Hosted output tokens |
 |---|---|---:|---:|---:|---:|
-| Extraction | calibration | 1.03 | 1.44 | 28 | 28 |
-| Classification | calibration | 0.27 | 0.40 | 3 | 3 |
+| Extraction | calibration | 2.03 | 1.44 | 28 | 28 |
+| Classification | calibration | 1.27 | 0.40 | 3 | 3 |
 | Summarization | calibration | 2.45 | 1.48 | 72 | 69 |
 | Explanation | calibration | 3.88 | 2.48 | 132 | 141 |
 | Basic code generation | calibration | 3.58 | 1.26 | 116 | 58 |
 | Incident investigation | calibration | 28.54 | 13.67 | 954 | 957 |
 | Code review | calibration | 51.70 | 35.43 | 1723 | 1760 |
-| Constraint planning | calibration | 32.21 | 45.54 | 1078 | 1207 |
-| Evidence synthesis | calibration | 32.48 | 39.17 | 1074 | 1076 |
+| Constraint planning | calibration | 52.21 | 45.54 | 1078 | 1207 |
+| Evidence synthesis | calibration | 52.48 | 39.17 | 1074 | 1076 |
 | Operational runbook | calibration | 15.46 | 11.94 | 552 | 573 |
 | Architecture review | calibration | 14.39 | 7.49 | 510 | 503 |
 | Validation: incident | validation | 30.18 | 14.24 | 1011 | 1035 |
 | Validation: code | validation | 28.87 | 17.98 | 977 | 1285 |
 | Validation: classification | validation | 0.34 | 0.25 | 3 | 3 |
 
-Sum of measured request durations: **245.39 seconds local** and **192.76 seconds hosted**. Hosted had a lower duration in 10 of 14 pairs; its summed duration was 21.4% lower. These sums are not workflow makespans. Output lengths differ, so they do not isolate hardware performance.
+Sum of the corrected table durations: **287.38 seconds slow/local** and **192.77 seconds fast/hosted**. Hosted is faster in **14 of 14 pairs**; its summed duration is **32.9% lower**. These sums use the displayed two-decimal values and are not workflow makespans or hardware-isolated comparisons. See [the corrected timing replay](corrected-timings.md) for regenerated scheduler results and the machine-readable CSV. Original raw logs were not edited.
 
-## Measured duration-profile inputs
+## Historical duration-profile inputs
+
+The remaining estimator/profile analysis uses the original logged timings, not a recalibration from the supplied end-to-end corrections. The corrections contain no replacement phase timings or pre-execution predictions. These historical tables should not be cited as a fresh evaluation on the corrected timing fixture.
+
+### Original duration-profile inputs
 
 | Backend | Short count / mean length | Medium count / mean length | Long count / mean length | Rate, length units/sec | Overhead, sec |
 |---|---:|---:|---:|---:|---:|

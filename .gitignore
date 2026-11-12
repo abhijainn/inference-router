@@ -9,6 +9,8 @@
 *.json
 *.jsonl
 *.csv
+# Public, owner-corrected 14-row summary fixture; raw measurements stay ignored.
+!examples/corrected-gemma-timings.csv
 *.safetensors
 *.bin
 *.onnx

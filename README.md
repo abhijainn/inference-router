@@ -8,6 +8,10 @@ The implementation benchmarks, describes requests, and makes provisional backend
 selections. It also simulates dependency-aware scheduling with dynamic arrivals
 offline. Live inference dispatch remains future work.
 
+## Current timing data
+
+The [14-row corrected timing table and regenerated scheduler replay](docs/corrected-timings.md) use the project owner’s supplied corrections. A [small CSV fixture](examples/corrected-gemma-timings.csv) preserves all 14 pairs. Older policy/scheduler reports are explicitly historical and retain their original inputs. No new inference was run for this correction.
+
 ## Precision correction and rerun status
 
 The original timing/scheduling results compare local **Q4_K_M** with hosted

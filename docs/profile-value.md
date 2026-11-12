@@ -1,5 +1,7 @@
 # Where request profiles change scheduling
 
+> **Historical timing inputs:** This report retains its original logged timings. Four local durations were subsequently corrected by the project owner. Use [the corrected table and regenerated scheduler comparisons](corrected-timings.md) for current results; do not mix these historical aggregates with that table. No raw logs or original predictions were rewritten.
+
 > **Precision scope:** These historical results use local Q4_K_M versus hosted BF16. They are not a matched-precision hardware comparison. The later BF16 timing rerun was invalidated by environmental interruptions; see the [precision audit](precision-audit.md).
 
 ## Question and frozen policy

@@ -1,5 +1,7 @@
 # Budget policy and paired Gemma replay
 
+> **Historical timing inputs:** This report retains its original logged timings. Four local durations were subsequently corrected by the project owner. Use [the corrected table and regenerated scheduler comparisons](corrected-timings.md) for current results; do not mix these historical aggregates with that table. No raw logs or original predictions were rewritten.
+
 The standalone policy now selects a backend without executing a request. It prefers local inference when its adjusted estimate fits the task budget; otherwise it chooses hosted if that estimate fits. If neither fits, it returns `neither_fits` with no backend. Missing estimates can return `uncertain`. Dispatch, dependency scheduling, persistent queues, and automatic deadline allocation remain future work.
 
 ## What this experiment was trying to answer
